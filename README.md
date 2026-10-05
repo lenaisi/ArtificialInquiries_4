@@ -114,9 +114,3 @@ ArtificialInquiries_04/
 ├── README.md
 └── diagram_class.md
 ```
-
-## 8. Références
-
-- Alcaras, G., Ricci, D., Prinetti, T., & de Vries, Z. (2025). *Artificial Inquiries*. Éditions Annexes. CC BY-NC.
-- Omeka S, manuel utilisateur : <https://omeka.org/s/docs/user-manual/>
-- Mermaid, diagramme de classes : <https://mermaid.ai/open-source/syntax/classDiagram.html>
