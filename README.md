@@ -4,9 +4,9 @@
 Outil numérique pour l'exercice 4 — « Memorable Conversations » du vademecum
 [*Artificial Inquiries*](https://hal.science/hal-05327878) (Alcaras, Ricci, Prinetti & de Vries, 2025, Éditions Annexes).
 
-## 1. L'exercice papier
+## 1. L'exercice 
 
-Le participant revient sur des conversations avec un LLM qui l'ont marqué (titres repérés à l'ex. 3b) :
+Le participant revient sur des conversations avec un LLM qui l'ont marqué  :
 
 1. Copier le titre de la conversation et décrire brièvement son contenu.
 2. Expliquer pourquoi elle a marqué : émotion (excitation, frustration, amusement, peur…), question morale ou éthique, changement de point de vue sur les LLM, conséquences sur le travail.
@@ -61,25 +61,9 @@ Voir [`diagram_class.md`](diagram_class.md). Correspondance proposée avec les p
 
 Pour que les participants saisissent eux-mêmes leurs fiches sans accès à l'administration, étudier un module de contribution publique (par exemple *Contribute*) ; à vérifier selon la version d'Omeka S installée.
 
-## 4. Installation locale d'Omeka S
 
-Procédure officielle : <https://omeka.org/s/docs/user-manual/install/>. Prérequis (versions exactes à vérifier sur cette page) :
 
-- serveur **Apache** (module `mod_rewrite` activé) ;
-- **PHP** avec les extensions requises ;
-- **MySQL** ou MariaDB ;
-- ImageMagick (miniatures).
-
-Étapes résumées :
-
-1. Installer une pile locale (XAMPP, MAMP, WAMP ou Docker).
-2. Créer une base de données et un utilisateur MySQL dédiés.
-3. Télécharger l'archive Omeka S et la décompresser dans le dossier web (ex. `htdocs/omeka-s`).
-4. Renseigner `config/database.ini` (hôte, base, utilisateur, mot de passe).
-5. Ouvrir `http://localhost/omeka-s/` et créer le compte administrateur.
-6. Installer les modules *Custom Vocab* et *Numeric Data Types* (dossier `modules/`, puis activation dans l'administration).
-
-## 5. Mise en place pour l'exercice 4
+## 4. Mise en place pour l'exercice 4
 
 1. **Vocabulaire** : créer le vocabulaire `ai:` (Vocabularies → Import) avec les propriétés du tableau ci-dessus.
 2. **Custom Vocab** : créer les listes « Émotion » et « Type d'impact ».
