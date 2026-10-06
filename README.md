@@ -4,7 +4,7 @@
 Outil numérique pour l'exercice 4 — « Memorable Conversations » du vademecum
 [*Artificial Inquiries*](https://hal.science/hal-05327878) (Alcaras, Ricci, Prinetti & de Vries, 2025, Éditions Annexes).
 
-## 1. L'exercice 
+## 1. L'exercice  
 
 Le participant revient sur des conversations avec un LLM qui l'ont marqué  :
 
