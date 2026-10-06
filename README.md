@@ -91,10 +91,4 @@ Pour que les participants saisissent eux-mêmes leurs fiches sans accès à l'ad
 | Traduction d'emails (échec) | Même sujet | Réponses vagues, hallucinations | frustration | 1 |
 | Plat pour 60 personnes | Idées de plats pour un anniversaire | Réponse utile mais générique | amusement | 3 |
 
-## 7. Structure du dépôt
 
-```
-ArtificialInquiries_04/
-├── README.md
-└── diagram_class.md
-```
