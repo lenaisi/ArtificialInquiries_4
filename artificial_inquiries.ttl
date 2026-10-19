@@ -1,18 +1,21 @@
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+@prefix artinq: <https://humanum-p8.fr/omk_artificialinquiries/onto/artinq#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix vs: <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
 @prefix o: <http://omeka.org/s/vocabs/o#> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix ma: <http://www.w3.org/ns/ma-ont#>.
-@prefix artinq: <https://humanum-p8.fr/omk_artificialinquiries/onto/artinq#> .
 
-<https://humanum-p8.fr/omk_artificialinquiries/onto/artinq#> a owl:Ontology ;
+<https://humanum-p8.fr/omk_artificialinquiries/onto/artinq#>
+    a owl:Ontology ;
     dcterms:title "Artificial Inquiries" .
 
+# CLASSES
+
 artinq:ConversationMemorable a rdfs:Class ;
-    rdfs:label "ConversationMemorable" ;
+    rdfs:label "Conversation mémorable" ;
     rdfs:domain o:Resource ;
     vs:term_status "experimental" .
 
@@ -22,76 +25,92 @@ artinq:Participant a rdfs:Class ;
     vs:term_status "experimental" .
 
 artinq:LLM a rdfs:Class ;
-    rdfs:label "LLM" ;
+    rdfs:label "Modèle de langage (LLM)" ;
     rdfs:domain o:Resource ;
     vs:term_status "experimental" .
 
 artinq:Emotion a rdfs:Class ;
-    rdfs:label "Emotion" ;
+    rdfs:label "Émotion" ;
     rdfs:domain o:Resource ;
     vs:term_status "experimental" .
 
 artinq:TypeImpact a rdfs:Class ;
-    rdfs:label "TypeImpact" ;
+    rdfs:label "Type d'impact" ;
     rdfs:domain o:Resource ;
     vs:term_status "experimental" .
 
 artinq:CategorieTache a rdfs:Class ;
-    rdfs:label "CategorieTache" ;
+    rdfs:label "Catégorie de tâche" ;
     rdfs:domain o:Resource ;
     vs:term_status "experimental" .
 
-artinq:contenu a rdf:Property ;
-    rdfs:label "a comme contenu" ;
-    rdfs:domain o:Resource ;
-    vs:term_status "experimental" .
+# PROPRIETES GENERALES
 
-artinq:pourquoiMarquante a rdf:Property ;
-    rdfs:label "pourquoi marquante" ;
-    rdfs:domain o:Resource ;
-    vs:term_status "experimental" .
-
-artinq:note a rdf:Property ;
-    rdfs:label "a comme note" ;
-    rdfs:domain o:Resource ;
-    vs:term_status "experimental" .
-
-artinq:evaluationPerformance a rdf:Property ;
-    rdfs:label "a comme évaluation de la performance" ;
-    rdfs:domain o:Resource ;
-    vs:term_status "experimental" .
-
-artinq:explicationPerformance a rdf:Property ;
-    rdfs:label "a comme explication de la performance" ;
+artinq:name a rdf:Property ;
+    rdfs:label "Nom" ;
     rdfs:domain o:Resource ;
     vs:term_status "experimental" .
 
 artinq:version a rdf:Property ;
-    rdfs:label "a comme version" ;
-    rdfs:domain o:Resource ;
+    rdfs:label "Version" ;
+    rdfs:domain artinq:LLM ;
     vs:term_status "experimental" .
 
-artinq:hasParticipant a rdf:Property ;
-    rdfs:label "a comme participant" ;
-    rdfs:domain o:Resource ;
+# PROPRIETES DE CONVERSATION
+
+artinq:content a rdf:Property ;
+    rdfs:label "Contenu" ;
+    rdfs:domain artinq:ConversationMemorable ;
     vs:term_status "experimental" .
 
-artinq:hasLLM a rdf:Property ;
-    rdfs:label "a comme LLM" ;
-    rdfs:domain o:Resource ;
+artinq:whyMemorable a rdf:Property ;
+    rdfs:label "Pourquoi marquante" ;
+    rdfs:domain artinq:ConversationMemorable ;
+    vs:term_status "experimental" .
+
+artinq:rating a rdf:Property ;
+    rdfs:label "Note" ;
+    rdfs:domain artinq:ConversationMemorable ;
+    vs:term_status "experimental" .
+
+artinq:performanceEvaluation a rdf:Property ;
+    rdfs:label "Évaluation de performance" ;
+    rdfs:domain artinq:ConversationMemorable ;
+    vs:term_status "experimental" .
+
+artinq:performanceExplanation a rdf:Property ;
+    rdfs:label "Explication de performance" ;
+    rdfs:domain artinq:ConversationMemorable ;
+    vs:term_status "experimental" .
+
+# RELATIONS ENTRE LES CLASSES
+
+artinq:createdBy a rdf:Property ;
+    rdfs:label "Créée par" ;
+    rdfs:domain artinq:ConversationMemorable ;
+    rdfs:range artinq:Participant ;
+    vs:term_status "experimental" .
+
+artinq:usesLLM a rdf:Property ;
+    rdfs:label "Modèle de langage utilisé" ;
+    rdfs:domain artinq:ConversationMemorable ;
+    rdfs:range artinq:LLM ;
     vs:term_status "experimental" .
 
 artinq:hasEmotion a rdf:Property ;
-    rdfs:label "a comme émotion" ;
-    rdfs:domain o:Resource ;
+    rdfs:label "Émotion caractéristique" ;
+    rdfs:domain artinq:ConversationMemorable ;
+    rdfs:range artinq:Emotion ;
     vs:term_status "experimental" .
 
-artinq:hasTypeImpact a rdf:Property ;
-    rdfs:label "a comme type d'impact" ;
-    rdfs:domain o:Resource ;
+artinq:hasImpactType a rdf:Property ;
+    rdfs:label "Type d'impact" ;
+    rdfs:domain artinq:ConversationMemorable ;
+    rdfs:range artinq:TypeImpact ;
     vs:term_status "experimental" .
 
-artinq:hasCategorieTache a rdf:Property ;
-    rdfs:label "a comme catégorie de tâche" ;
-    rdfs:domain o:Resource ;
+artinq:hasTaskCategory a rdf:Property ;
+    rdfs:label "Catégorie de tâche" ;
+    rdfs:domain artinq:ConversationMemorable ;
+    rdfs:range artinq:CategorieTache ;
     vs:term_status "experimental" .
