@@ -1,0 +1,97 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix vs: <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
+@prefix o: <http://omeka.org/s/vocabs/o#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix ma: <http://www.w3.org/ns/ma-ont#>.
+@prefix artinq: <https://humanum-p8.fr/omk_artificialinquiries/onto/artinq#> .
+
+<https://humanum-p8.fr/omk_artificialinquiries/onto/artinq#> a owl:Ontology ;
+    dcterms:title "Artificial Inquiries" .
+
+artinq:ConversationMemorable a rdfs:Class ;
+    rdfs:label "ConversationMemorable" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:Participant a rdfs:Class ;
+    rdfs:label "Participant" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:LLM a rdfs:Class ;
+    rdfs:label "LLM" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:Emotion a rdfs:Class ;
+    rdfs:label "Emotion" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:TypeImpact a rdfs:Class ;
+    rdfs:label "TypeImpact" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:CategorieTache a rdfs:Class ;
+    rdfs:label "CategorieTache" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:contenu a rdf:Property ;
+    rdfs:label "a comme contenu" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:pourquoiMarquante a rdf:Property ;
+    rdfs:label "pourquoi marquante" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:note a rdf:Property ;
+    rdfs:label "a comme note" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:evaluationPerformance a rdf:Property ;
+    rdfs:label "a comme évaluation de la performance" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:explicationPerformance a rdf:Property ;
+    rdfs:label "a comme explication de la performance" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:version a rdf:Property ;
+    rdfs:label "a comme version" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:hasParticipant a rdf:Property ;
+    rdfs:label "a comme participant" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:hasLLM a rdf:Property ;
+    rdfs:label "a comme LLM" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:hasEmotion a rdf:Property ;
+    rdfs:label "a comme émotion" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:hasTypeImpact a rdf:Property ;
+    rdfs:label "a comme type d'impact" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
+
+artinq:hasCategorieTache a rdf:Property ;
+    rdfs:label "a comme catégorie de tâche" ;
+    rdfs:domain o:Resource ;
+    vs:term_status "experimental" .
