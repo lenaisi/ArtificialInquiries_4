@@ -1,263 +1,613 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Memorable Conversations — Administration</title>
+<title>Memorable Conversations — Ex4</title>
+<meta name="description" content="IHM CRUD de l'exercice 4 « Memorable Conversations » (Artificial Inquiries) connectée à l'API Omeka S.">
 <style>
-:root{--bg:#f4f6fb;--panel:#fff;--ink:#20283a;--muted:#667085;--line:#e4e8f0;--accent:#5146e5;--accent2:#3730a3;--danger:#b42318;--ok:#067647}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-header{background:#171b34;color:#fff;padding:24px max(20px,calc((100% - 1180px)/2));}
-header .eyebrow{color:#b9b8ff;text-transform:uppercase;letter-spacing:.12em;font-size:.75rem;font-weight:700}
-header h1{margin:6px 0;font-size:clamp(1.6rem,3vw,2.2rem)}header p{margin:0;color:#d4d7e5}
-main{max-width:1180px;margin:24px auto;padding:0 18px 48px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px;box-shadow:0 5px 20px #26304a0a}
-.panel h2{font-size:1.1rem;margin:0 0 14px}.muted{color:var(--muted);font-size:.9rem}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}
-label{font-weight:650;font-size:.88rem}input,textarea,select{font:inherit;width:100%;border:1px solid #cfd5e2;border-radius:9px;padding:10px 11px;background:#fff;color:var(--ink)}
-textarea{min-height:92px;resize:vertical}input:focus,textarea:focus,select:focus{outline:3px solid #5146e526;border-color:var(--accent)}
-.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}button{border:0;border-radius:9px;padding:10px 14px;font:inherit;font-weight:650;cursor:pointer;background:var(--accent);color:#fff}button:hover{background:var(--accent2)}button.secondary{background:#eef0f7;color:#30384b}button.danger{background:#fff0ef;color:var(--danger)}button:disabled{opacity:.5;cursor:not-allowed}
-.status{padding:11px 13px;border-radius:10px;background:#f0f2f8;color:#414a5d;margin:12px 0;white-space:pre-wrap;overflow-wrap:anywhere}.status.ok{background:#ecfdf3;color:var(--ok)}.status.error{background:#fff0ef;color:var(--danger)}
-.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.toolbar input{max-width:360px}.toolbar select{max-width:280px}
-.table-wrap{overflow:auto;margin-top:12px}table{width:100%;border-collapse:collapse;min-width:620px}th,td{text-align:left;border-bottom:1px solid var(--line);padding:12px 10px;vertical-align:top}th{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}td .row-actions{display:flex;gap:6px}td button{padding:6px 9px;font-size:.85rem}
-.note{border-left:4px solid #f0b429;background:#fffaeb;padding:12px 14px;border-radius:7px;color:#694b00;font-size:.9rem}
-footer{text-align:center;color:var(--muted);font-size:.85rem;padding:8px}
-@media(max-width:680px){.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.panel{padding:15px}.toolbar{align-items:stretch}.toolbar input,.toolbar select{max-width:none;width:100%}}
+  :root {
+    --bg: #f6f5f1; --panel: #ffffff; --ink: #1f1f1d; --muted: #6b6a64; --line: #e2e0d8;
+    --accent: #2f5bd3; --accent-ink: #ffffff; --danger: #b3261e; --ok: #1d7a46; --soft: #eef1fb;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161614; --panel: #201f1d; --ink: #ecebe6; --muted: #a3a29b; --line: #34332f;
+      --accent: #7f9cf5; --accent-ink: #111; --danger: #f2a49f; --ok: #7fd4a2; --soft: #262a36;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; flex-wrap: wrap; }
+  h1 { font-size: 1.15rem; margin: 0; }
+  h1 small { display: block; font-weight: 400; color: var(--muted); font-size: .85rem; }
+  h2 { font-size: 1.05rem; margin: 0 0 .6rem; }
+  h3 { font-size: .95rem; margin: 1rem 0 .4rem; color: var(--muted); font-weight: 600; }
+  .who { display: flex; align-items: center; gap: 10px; font-size: .9rem; }
+  .who img { width: 28px; height: 28px; border-radius: 50%; }
+  .badge { font-size: .75rem; padding: 2px 8px; border-radius: 99px; background: var(--soft); color: var(--muted); }
+  button, .btn { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: .45rem .9rem; border-radius: 8px; cursor: pointer; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  button.danger { color: var(--danger); border-color: var(--danger); background: transparent; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  input, textarea, select { font: inherit; width: 100%; padding: .5rem .6rem; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+  textarea { min-height: 80px; resize: vertical; }
+  label { display: block; font-weight: 600; font-size: .88rem; margin: .7rem 0 .25rem; }
+  label .req { color: var(--danger); }
+  .hint { color: var(--muted); font-size: .82rem; margin: .25rem 0 0; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+  main { padding: 18px 0 40px; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 14px; }
+  .tabs button { border-radius: 99px; }
+  .tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 16px; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+  .list { list-style: none; margin: 0; padding: 0; }
+  .list li { border-bottom: 1px solid var(--line); }
+  .list li button { width: 100%; text-align: left; border: 0; border-radius: 0; padding: .6rem .3rem; background: transparent; display: flex; justify-content: space-between; gap: 8px; }
+  .list li button:hover, .list li button.active { background: var(--soft); }
+  .list .id { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .spread { justify-content: space-between; }
+  dl { margin: 0; }
+  dt { font-size: .8rem; color: var(--muted); margin-top: .6rem; }
+  dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .link { color: var(--accent); background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
+  .msg { padding: .6rem .8rem; border-radius: 8px; margin: 0 0 12px; font-size: .9rem; display: none; }
+  .msg.show { display: block; }
+  .msg.err { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); }
+  .msg.ok { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+  .providers { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
+  .provider { border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; background: var(--panel); }
+  .provider.off { opacity: .65; }
+  .provider h3 { margin: 0 0 .3rem; color: var(--ink); }
+  .empty { color: var(--muted); padding: 1rem 0; }
+  details summary { cursor: pointer; color: var(--muted); font-size: .88rem; }
+  footer { color: var(--muted); font-size: .8rem; padding: 0 16px 30px; }
+  [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <header>
-  <div class="eyebrow">Artificial Inquiries · Exercice 4</div>
-  <h1>Memorable Conversations</h1>
-  <p>Interface de gestion des conversations mémorables avec Omeka S</p>
+  <div class="wrap top">
+    <h1>Memorable Conversations <small>Exercice 4 — Artificial Inquiries · IHM CRUD Omeka S (vocabulaire artinq)</small></h1>
+    <div class="who" id="who"></div>
+  </div>
 </header>
-<main>
-  <section class="panel">
-    <h2>1. Connexion à l'API Omeka S</h2>
-    <p class="muted">Pour tester en local, ouvrez cette page depuis le même serveur XAMPP que votre Omeka S. Les clés ne sont pas enregistrées par cette page.</p>
-    <div class="grid">
-      <div class="field full"><label for="apiBase">Adresse de l'API</label><input id="apiBase" value="http://localhost/omeka-s/api" placeholder="http://localhost/omeka-s/api"></div>
-      <div class="field"><label for="keyIdentity">Clé API — key_identity (facultatif pour lecture publique)</label><input id="keyIdentity" autocomplete="off" placeholder="Votre identité API"></div>
-      <div class="field"><label for="keyCredential">Clé API — key_credential</label><input id="keyCredential" type="password" autocomplete="off" placeholder="Votre clé secrète API"></div>
-      <div class="field full"><label for="templateId">ID du modèle de ressource ConversationMemorable (facultatif)</label><input id="templateId" type="number" min="1" placeholder="À renseigner après vérification dans Omeka S"></div>
-    </div>
-    <div class="actions"><button id="connectBtn">Tester la connexion et charger</button><button class="secondary" id="loadBtn">Actualiser les conversations</button></div>
-    <div id="connectionStatus" class="status" role="status">En attente de connexion.</div>
-    <div class="note"><strong>Sécurité :</strong> ne publiez jamais une clé API privée dans GitHub Pages. Cette page est un prototype pédagogique. Pour une application publique avec opérations d'écriture, utilisez un backend sécurisé ou une authentification serveur adaptée.</div>
-  </section>
 
-  <section class="panel">
-    <h2>2. Ajouter / modifier une conversation</h2>
-    <p class="muted">Les termes RDF personnalisés de votre projet doivent être renseignés dans la configuration JavaScript en bas de ce fichier avant d'utiliser toutes les propriétés.</p>
-    <form id="conversationForm">
-      <input id="editId" type="hidden">
-      <div class="grid">
-        <div class="field full"><label for="titre">Titre *</label><input id="titre" required maxlength="250" placeholder="Titre de la conversation"></div>
-        <div class="field full"><label for="contenu">Contenu</label><textarea id="contenu" placeholder="Contenu de la conversation"></textarea></div>
-        <div class="field full"><label for="pourquoi">Pourquoi est-elle marquante ?</label><textarea id="pourquoi" placeholder="Expliquez pourquoi cette conversation est mémorable"></textarea></div>
-        <div class="field"><label for="note">Note (0 à 10)</label><input id="note" type="number" min="0" max="10" step="1" placeholder="0–10"></div>
-        <div class="field"><label for="evaluation">Évaluation de performance</label><input id="evaluation" placeholder="Ex. : satisfaisante, mitigée…"></div>
-        <div class="field full"><label for="explication">Explication de performance</label><textarea id="explication" placeholder="Expliquez l'évaluation"></textarea></div>
+<main class="wrap">
+  <div id="msg" class="msg" role="status"></div>
+
+  <!-- ===================== AUTHENTIFICATION ===================== -->
+  <section id="authView" class="panel" hidden>
+    <h2>Connexion</h2>
+    <label for="apiUrl">Adresse de l'API Omeka S</label>
+    <input id="apiUrl" value="http://localhost/omeka-s/api/">
+    <p class="hint">Par défaut : l'Omeka S installé en local avec XAMPP.</p>
+
+    <div class="providers">
+      <form class="provider" id="formLocal">
+        <h3>Local (compte Omeka S)</h3>
+        <p class="hint">Lecture et écriture. Email du compte Omeka + clé API (Utilisateurs › Modifier › Clés API).</p>
+        <label for="lMail">Email</label>
+        <input id="lMail" type="email" required autocomplete="username">
+        <label for="lIdent">key_identity</label>
+        <input id="lIdent" required autocomplete="off">
+        <label for="lKey">key_credential</label>
+        <input id="lKey" type="password" required autocomplete="off">
+        <p class="row" style="margin-top:.8rem"><button class="primary" type="submit">Se connecter</button></p>
+      </form>
+
+      <form class="provider" id="formGithub">
+        <h3>GitHub</h3>
+        <p class="hint">Lecture seule. Identification par un jeton d'accès personnel GitHub (aucune permission nécessaire).</p>
+        <label for="gToken">Jeton GitHub (fine-grained, sans permission)</label>
+        <input id="gToken" type="password" required autocomplete="off">
+        <p class="row" style="margin-top:.8rem"><button type="submit">Se connecter avec GitHub</button></p>
+      </form>
+
+      <div class="provider off">
+        <h3>Google</h3>
+        <p class="hint">Non configuré : nécessite un identifiant client OAuth créé dans Google Cloud Console pour l'adresse GitHub Pages (voir GOOGLE_CLIENT_ID dans le code).</p>
+        <div id="googleBtn" style="margin-top:.8rem"></div>
       </div>
-      <div class="actions"><button type="submit" id="saveBtn">Créer la conversation</button><button class="secondary" type="button" id="resetBtn">Vider le formulaire</button></div>
-      <div id="formStatus" class="status" role="status">Prêt.</div>
-    </form>
+
+      <div class="provider off">
+        <h3>CAS Paris 8</h3>
+        <p class="hint">Non configuré : nécessite l'enregistrement du service auprès du CAS de l'université et un serveur de validation des tickets.</p>
+        <button disabled>Se connecter avec le CAS</button>
+      </div>
+    </div>
+
+    <p style="margin-top:14px"><button id="btnAnon">Continuer sans compte (lecture des données publiques)</button></p>
   </section>
 
-  <section class="panel">
-    <h2>3. Conversations enregistrées</h2>
-    <div class="toolbar">
-      <input id="searchInput" placeholder="Rechercher par titre ou contenu…">
-      <button class="secondary" id="searchBtn">Rechercher</button>
+  <!-- ===================== APPLICATION ===================== -->
+  <section id="appView" hidden>
+    <nav class="tabs" id="tabs" aria-label="Classes de l'exercice"></nav>
+    <p class="hint" id="classHint" style="margin:-6px 0 12px"></p>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="row spread">
+          <h2 id="listTitle">Items</h2>
+          <div class="row">
+            <button id="btnRefresh" title="Recharger">↻</button>
+            <button id="btnNew" class="primary">+ Nouveau</button>
+          </div>
+        </div>
+        <input id="filter" placeholder="Filtrer par titre…" style="margin:.4rem 0 .6rem">
+        <ul class="list" id="list"></ul>
+      </div>
+
+      <div class="panel" id="detail">
+        <p class="empty">Choisis un item dans la liste, ou clique sur « + Nouveau ».</p>
+      </div>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>ID</th><th>Titre</th><th>Contenu</th><th>Actions</th></tr></thead>
-        <tbody id="itemsBody"><tr><td colspan="4" class="muted">Connectez-vous pour charger les ressources.</td></tr></tbody>
-      </table>
-    </div>
-    <div id="listStatus" class="status" role="status">Aucune donnée chargée.</div>
   </section>
-  <footer>Prototype pédagogique · HTML / CSS / JavaScript · Omeka S REST API</footer>
 </main>
-<script>
-/*
- * CONFIGURATION RDF À ADAPTER :
- * Remplacez les valeurs par les termes exacts de vos propriétés Omeka S.
- * Exemple de terme : artinq:titre si votre vocabulaire expose ce préfixe.
- * dcterms:title est une propriété standard utile pour le titre affiché par Omeka.
- */
-const RDF = {
-  titre: "dcterms:title",
-  contenu: "artinq:contenu",
-  pourquoi: "artinq:pourquoiMarquante",
-  note: "artinq:note",
-  evaluation: "artinq:evaluationPerformance",
-  explication: "artinq:explicationPerformance"
-};
-const $ = id => document.getElementById(id);
-let cachedItems = [];
 
-function baseUrl() {
-  return $("apiBase").value.trim().replace(/\/+$/, "");
+<footer class="wrap">
+  Master THYP, Université Paris 8 · Cours <em>Langages du Web</em> ·
+  Données : API REST Omeka S.
+</footer>
+
+<script type="module">
+// ─────────────────────────────────────────────────────────────
+// Configuration de l'exercice
+// ─────────────────────────────────────────────────────────────
+const CLASSES = [
+  { name: 'ConversationMemorable', label: 'Conversations', hint: 'Ex4 — les conversations mémorables : titre, contenu, pourquoi elle a marqué, note et évaluation de la performance.' },
+  { name: 'Participant',    label: 'Participants',        hint: 'La personne qui réalise l\'exercice.' },
+  { name: 'LLM',            label: 'LLM',                 hint: 'Le modèle utilisé (ChatGPT, Claude…).' },
+  { name: 'Emotion',        label: 'Émotions',            hint: 'Les émotions ressenties (enthousiasme, frustration, amusement, peur…).' },
+  { name: 'TypeImpact',     label: 'Types d\'impact',     hint: 'Émotionnel, moral ou éthique, changement de point de vue, conséquence sur le travail…' },
+  { name: 'CategorieTache', label: 'Catégories de tâche', hint: 'Traduction, rédaction, code, recherche…' },
+];
+// Propriétés de type « lien vers un item » : classe visée
+const LINKS = {
+  'artinq:createdBy': 'Participant', 'artinq:usesLLM': 'LLM', 'artinq:hasEmotion': 'Emotion',
+  'artinq:hasImpactType': 'TypeImpact', 'artinq:hasTaskCategory': 'CategorieTache',
+};
+// Propriétés affichées en zone de texte longue
+const LONG = new Set(['artinq:content', 'artinq:whyMemorable', 'artinq:performanceEvaluation',
+  'artinq:performanceExplanation']);
+// Propriétés à valeur oui / non
+const YESNO = new Set([]);
+// Note de 1 à 5
+const NOTE = 'artinq:rating';
+
+// ─────────────────────────────────────────────────────────────
+// Petit état + utilitaires
+// ─────────────────────────────────────────────────────────────
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const state = { api: '', session: null, props: {}, propsByTerm: {}, classes: {}, templates: {}, current: 'ConversationMemorable', items: [], cache: {} };
+
+const store = {
+  get(k) { try { return JSON.parse(sessionStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k) { try { sessionStorage.removeItem(k); } catch {} },
+};
+
+function flash(text, type = 'ok') {
+  const m = $('#msg');
+  m.textContent = text;
+  m.className = 'msg show ' + type;
+  clearTimeout(flash.t);
+  flash.t = setTimeout(() => m.className = 'msg', type === 'err' ? 9000 : 3500);
 }
-function apiUrl(path) {
-  const url = new URL(baseUrl() + "/" + path.replace(/^\/+/, ""));
-  const identity = $("keyIdentity").value.trim();
-  const credential = $("keyCredential").value.trim();
-  if (identity) url.searchParams.set("key_identity", identity);
-  if (credential) url.searchParams.set("key_credential", credential);
-  return url.toString();
+
+// ─────────────────────────────────────────────────────────────
+// Client de l'API REST Omeka S (https://omeka.org/s/docs/developer/api/)
+// ─────────────────────────────────────────────────────────────
+function keys() {
+  const s = state.session;
+  return s && s.ident ? `key_identity=${encodeURIComponent(s.ident)}&key_credential=${encodeURIComponent(s.key)}` : '';
 }
-function setStatus(id, message, kind="") {
-  const el = $(id); el.textContent = message; el.className = "status" + (kind ? " " + kind : "");
-}
-async function apiRequest(path, options={}) {
-  const response = await fetch(apiUrl(path), {
-    ...options,
-    headers: {"Accept":"application/ld+json, application/json", ...(options.body ? {"Content-Type":"application/ld+json"} : {}), ...(options.headers || {})}
-  });
-  const bodyText = await response.text();
-  let data = null;
-  try { data = bodyText ? JSON.parse(bodyText) : null; } catch {}
-  if (!response.ok) {
-    const detail = data?.["o:message"] || data?.message || bodyText || response.statusText;
-    throw new Error(`HTTP ${response.status} — ${detail}`);
+async function api(path, { method = 'GET', body, auth = true } = {}) {
+  const sep = path.includes('?') ? '&' : '?';
+  const k = auth ? keys() : '';
+  const url = state.api + path + (k ? sep + k : '');
+  let res;
+  try {
+    res = await fetch(url, {
+      method,
+      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch (e) {
+    throw new Error('Impossible de joindre l\'API Omeka S (' + state.api + '). Vérifie que XAMPP (Apache + MySQL) est démarré et que l\'en-tête CORS est activé.');
+  }
+  if (method === 'DELETE' && res.ok) return true;
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    const detail = data && data.errors ? JSON.stringify(data.errors) : res.status + ' ' + res.statusText;
+    throw new Error('Erreur API : ' + detail);
   }
   return data;
 }
-function valuesFor(item, term) { return Array.isArray(item?.[term]) ? item[term] : []; }
-function textValue(item, term) {
-  const value = valuesFor(item, term)[0];
-  return value ? (value["@value"] ?? value.display_title ?? value["o:label"] ?? "") : "";
+
+// Charge vocabulaires, classes et modèles de ressources artinq
+async function loadSchema() {
+  for (const prefix of ['dcterms', 'artinq']) {
+    const props = await api(`properties?per_page=500&vocabulary_prefix=${prefix}`, { auth: false });
+    props.forEach(p => { state.props[p['o:id']] = p; state.propsByTerm[p['o:term']] = p; });
+  }
+  const classes = await api('resource_classes?per_page=100&vocabulary_prefix=artinq', { auth: false });
+  if (!classes.length) throw new Error('Le vocabulaire artinq n\'est pas importé dans Omeka S.');
+  classes.forEach(c => { state.classes[c['o:local_name']] = c; });
+  const rts = await api('resource_templates?per_page=100', { auth: false });
+  rts.forEach(rt => {
+    const m = /^artinq\s+(\w+)$/i.exec(rt['o:label'].trim());
+    if (m) state.templates[m[1]] = rt;
+  });
 }
-function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+
+// ─────────────────────────────────────────────────────────────
+// Authentification
+// ─────────────────────────────────────────────────────────────
+async function loginLocal(mail, ident, key) {
+  state.session = { provider: 'local', ident, key };
+  let users;
+  try { users = await api('users?email=' + encodeURIComponent(mail)); }
+  catch (e) {
+    state.session = null;
+    throw new Error(e.message.startsWith('Erreur API') ? 'Email ou clé API incorrects.' : e.message);
+  }
+  const u = Array.isArray(users) && users.find(x => x['o:email'] === mail);
+  if (!u) { state.session = null; throw new Error('Email ou clé API incorrects.'); }
+  state.session = { provider: 'local', ident, key, name: u['o:name'], email: mail, role: u['o:role'], canWrite: true };
 }
-function itemTitle(item) {
-  return textValue(item, RDF.titre) || item["o:title"] || `Ressource #${item["o:id"]}`;
+
+// Connexion Google (Google Identity Services) : décode le jeton d'identité (JWT)
+const GOOGLE_CLIENT_ID = ''; // à remplir avec votre propre identifiant client Google
+function decodeJwt(token) {
+  const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+  const json = decodeURIComponent(atob(b64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+  return JSON.parse(json);
 }
-function buildLiteral(term, value) {
-  if (!term || !value.trim()) return undefined;
-  return [{"type":"literal","property_id":"auto","@value":value.trim()}];
+async function onGoogleLogin(response) {
+  try {
+    const g = decodeJwt(response.credential);
+    state.session = { provider: 'google', name: g.name || g.email, email: g.email, avatar: g.picture, canWrite: false };
+    await startApp();
+    flash('Connectée avec Google (' + g.email + ').');
+  } catch (err) { state.session = null; flash(err.message, 'err'); }
 }
-function buildPayload() {
-  const titre = $("titre").value.trim();
-  const contenu = $("contenu").value;
-  const pourquoi = $("pourquoi").value;
-  const note = $("note").value;
-  const evaluation = $("evaluation").value;
-  const explication = $("explication").value;
-  const payload = {"dcterms:title":[{"type":"literal","property_id":"auto","@value":titre}]};
-  const fields = [
-    [RDF.contenu, contenu],
-    [RDF.pourquoi, pourquoi],
-    [RDF.note, note],
-    [RDF.evaluation, evaluation],
-    [RDF.explication, explication]
-  ];
-  for (const [term, value] of fields) {
-    if (term && !term.startsWith("REMPLACER:") && value.trim()) {
-      payload[term] = [{"type":"literal","property_id":"auto","@value":value.trim()}];
+function initGoogle(tries = 0) {
+  if (!GOOGLE_CLIENT_ID) return;
+  if (!(window.google && google.accounts && google.accounts.id)) {
+    if (tries < 50) setTimeout(() => initGoogle(tries + 1), 200);
+    else $('#googleBtn').innerHTML = '<p class="hint">Bouton Google indisponible (script bloqué ?).</p>';
+    return;
+  }
+  google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onGoogleLogin });
+  google.accounts.id.renderButton($('#googleBtn'), { theme: 'outline', size: 'large', text: 'signin_with', locale: 'fr' });
+}
+
+async function loginGithub(token) {
+  let res;
+  try { res = await fetch('https://api.github.com/user', { headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' } }); }
+  catch { throw new Error('Impossible de joindre GitHub.'); }
+  if (!res.ok) throw new Error('Jeton GitHub refusé (' + res.status + ').');
+  const g = await res.json();
+  state.session = { provider: 'github', name: g.name || g.login, login: g.login, avatar: g.avatar_url, canWrite: false };
+}
+
+async function startApp() {
+  state.api = $('#apiUrl').value.trim().replace(/\/?$/, '/');
+  store.set('artinq_api', state.api);
+  await loadSchema();
+  if (state.session && state.session.provider === 'github') await linkGithubParticipant();
+  store.set('artinq_session', state.session);
+  renderWho();
+  $('#authView').hidden = true;
+  $('#appView').hidden = false;
+  renderTabs();
+  await selectClass(state.current);
+}
+
+async function linkGithubParticipant() {
+  const prop = state.propsByTerm['artinq:compteGithub'];
+  const cls = state.classes.Participant;
+  if (!prop || !cls) return;
+  const q = `items?resource_class_id=${cls['o:id']}&property[0][property]=${prop['o:id']}&property[0][type]=eq&property[0][text]=${encodeURIComponent(state.session.login)}`;
+  const found = await api(q, { auth: false });
+  if (found.length) state.session.participant = { id: found[0]['o:id'], title: found[0]['o:title'] };
+}
+
+function renderWho() {
+  const s = state.session, who = $('#who');
+  if (!s) {
+    who.innerHTML = '<span class="badge">Visiteur · lecture seule</span> <button id="btnLogout">Se connecter</button>';
+  } else {
+    const via = { local: 'Omeka S', github: 'GitHub', google: 'Google' }[s.provider];
+    who.innerHTML = (s.avatar ? `<img src="${esc(s.avatar)}" alt="">` : '') +
+      `<span><strong>${esc(s.name)}</strong> <span class="badge">${via}${s.canWrite ? '' : ' · lecture seule'}</span>` +
+      (s.participant ? `<br><span class="hint">Participant : ${esc(s.participant.title)}</span>` : '') +
+      `</span><button id="btnLogout">Déconnexion</button>`;
+  }
+  $('#btnLogout').onclick = logout;
+  $('#btnNew').disabled = !(s && s.canWrite);
+}
+
+function logout() {
+  state.session = null;
+  store.del('artinq_session');
+  $('#appView').hidden = true;
+  $('#authView').hidden = false;
+  $('#who').innerHTML = '';
+}
+
+// ─────────────────────────────────────────────────────────────
+// Liste (READ)
+// ─────────────────────────────────────────────────────────────
+function renderTabs() {
+  $('#tabs').innerHTML = CLASSES.map(c =>
+    `<button role="tab" data-c="${c.name}" aria-selected="${c.name === state.current}">${c.label}</button>`).join('');
+  $('#tabs').querySelectorAll('button').forEach(b => b.onclick = () => selectClass(b.dataset.c));
+}
+
+async function selectClass(name) {
+  state.current = name;
+  renderTabs();
+  const conf = CLASSES.find(c => c.name === name);
+  $('#classHint').textContent = conf.hint;
+  $('#listTitle').textContent = conf.label;
+  $('#detail').innerHTML = '<p class="empty">Choisis un item dans la liste, ou clique sur « + Nouveau ».</p>';
+  await loadList();
+}
+
+async function fetchItemsOfClass(name) {
+  const cls = state.classes[name];
+  if (!cls) return [];
+  return api(`items?resource_class_id=${cls['o:id']}&per_page=200&sort_by=created&sort_order=desc`);
+}
+
+async function loadList() {
+  $('#list').innerHTML = '<li class="empty">Chargement…</li>';
+  try {
+    state.items = await fetchItemsOfClass(state.current);
+    renderList();
+  } catch (e) { $('#list').innerHTML = ''; flash(e.message, 'err'); }
+}
+
+function renderList(activeId) {
+  const f = $('#filter').value.trim().toLowerCase();
+  const items = state.items.filter(i => (i['o:title'] || '').toLowerCase().includes(f));
+  $('#list').innerHTML = items.length ? items.map(i =>
+    `<li><button data-id="${i['o:id']}" class="${i['o:id'] === activeId ? 'active' : ''}">
+       <span>${esc(i['o:title'] || '(sans titre)')}</span><span class="id">#${i['o:id']}</span></button></li>`).join('')
+    : '<li class="empty">Aucun item.</li>';
+  $('#list').querySelectorAll('button').forEach(b => b.onclick = () => showItem(+b.dataset.id));
+}
+
+// ─────────────────────────────────────────────────────────────
+// Détail d'un item (READ) + liens entrants
+// ─────────────────────────────────────────────────────────────
+function valuesOf(item, term) { return item[term] || []; }
+function valueText(v) {
+  if (v.type && v.type.startsWith('resource')) return null;
+  return v['@value'] ?? v['@id'] ?? '';
+}
+
+async function showItem(id) {
+  let item;
+  try { item = await api('items/' + id); } catch (e) { return flash(e.message, 'err'); }
+  renderList(id);
+  const tpl = state.templates[state.current];
+  const terms = tpl ? tpl['o:resource_template_property'].map(p => state.props[p['o:property']['o:id']]['o:term']) : [];
+  const canWrite = state.session && state.session.canWrite;
+
+  let html = `<div class="row spread"><h2>${esc(item['o:title'] || '(sans titre)')}</h2><span class="id">#${item['o:id']}</span></div><dl>`;
+  for (const term of terms) {
+    const vals = valuesOf(item, term);
+    if (!vals.length) continue;
+    const label = labelOf(term);
+    html += `<dt>${esc(label)}</dt><dd>` + vals.map(v => {
+      const t = valueText(v);
+      if (t !== null) return esc(t);
+      return `<button class="link" data-go="${v.value_resource_id}">${esc(v.display_title || '#' + v.value_resource_id)}</button>`;
+    }).join('<br>') + '</dd>';
+  }
+  html += '</dl><h3>Items qui pointent vers celui-ci</h3><div id="incoming" class="hint">Chargement…</div>';
+  if (canWrite) html += `<p class="row" style="margin-top:1rem"><button class="primary" id="btnEdit">Modifier</button><button class="danger" id="btnDel">Supprimer</button></p>`;
+  $('#detail').innerHTML = html;
+
+  $('#detail').querySelectorAll('[data-go]').forEach(b => b.onclick = () => goToItem(+b.dataset.go));
+  if (canWrite) {
+    $('#btnEdit').onclick = () => showForm(item);
+    $('#btnDel').onclick = () => deleteItem(item);
+  }
+  loadIncoming(item['o:id']);
+}
+
+async function loadIncoming(id) {
+  const incoming = [];
+  const linkProps = Object.keys(LINKS).map(t => state.propsByTerm[t]).filter(Boolean);
+  try {
+    for (const p of linkProps) {
+      const res = await api(`items?per_page=200&property[0][property]=${p['o:id']}&property[0][type]=res&property[0][text]=${id}`);
+      res.forEach(i => incoming.push({ i, via: labelOf(p['o:term']) }));
+    }
+  } catch { /* liste facultative */ }
+  const box = $('#incoming');
+  if (!box) return;
+  box.innerHTML = incoming.length ? incoming.map(({ i, via }) =>
+    `<div><button class="link" data-go="${i['o:id']}">${esc(i['o:title'])}</button> <span class="hint">(${esc(classOf(i))} · ${esc(via)})</span></div>`).join('')
+    : 'Aucun.';
+  box.querySelectorAll('[data-go]').forEach(b => b.onclick = () => goToItem(+b.dataset.go));
+}
+
+function classOf(item) {
+  const id = item['o:resource_class'] && item['o:resource_class']['o:id'];
+  const c = Object.values(state.classes).find(c => c['o:id'] === id);
+  return c ? c['o:local_name'] : '?';
+}
+
+async function goToItem(id) {
+  let item;
+  try { item = await api('items/' + id); } catch (e) { return flash(e.message, 'err'); }
+  const name = classOf(item);
+  if (CLASSES.some(c => c.name === name) && name !== state.current) {
+    state.current = name;
+    renderTabs();
+    const conf = CLASSES.find(c => c.name === name);
+    $('#classHint').textContent = conf.hint;
+    $('#listTitle').textContent = conf.label;
+    await loadList();
+  }
+  showItem(id);
+}
+
+function labelOf(term) {
+  const tpl = state.templates[state.current];
+  const p = state.propsByTerm[term];
+  if (tpl && p) {
+    const rtp = tpl['o:resource_template_property'].find(x => x['o:property']['o:id'] === p['o:id']);
+    if (rtp && rtp['o:alternate_label']) return rtp['o:alternate_label'];
+  }
+  return p ? p['o:label'] : term;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Formulaire (CREATE / UPDATE) généré depuis le modèle de ressource
+// ─────────────────────────────────────────────────────────────
+async function showForm(item = null) {
+  const tpl = state.templates[state.current];
+  if (!tpl) return flash('Modèle de ressource « artinq ' + state.current + ' » introuvable dans Omeka S.', 'err');
+  const rtps = tpl['o:resource_template_property'];
+
+  // options des listes de liens
+  const options = {};
+  for (const rtp of rtps) {
+    const term = state.props[rtp['o:property']['o:id']]['o:term'];
+    if (LINKS[term] && !options[LINKS[term]]) {
+      try { options[LINKS[term]] = await fetchItemsOfClass(LINKS[term]); } catch { options[LINKS[term]] = []; }
     }
   }
-  const template = $("templateId").value.trim();
-  if (template) payload["o:resource_template"] = {"o:id": Number(template)};
-  return payload;
-}
-function fillForm(item) {
-  $("editId").value = item["o:id"];
-  $("titre").value = textValue(item, RDF.titre) || item["o:title"] || "";
-  $("contenu").value = textValue(item, RDF.contenu);
-  $("pourquoi").value = textValue(item, RDF.pourquoi);
-  $("note").value = textValue(item, RDF.note);
-  $("evaluation").value = textValue(item, RDF.evaluation);
-  $("explication").value = textValue(item, RDF.explication);
-  $("saveBtn").textContent = "Enregistrer les modifications";
-  setStatus("formStatus", `Modification de la ressource #${item["o:id"]}.`);
-  window.scrollTo({top:$("conversationForm").getBoundingClientRect().top + window.scrollY - 20,behavior:"smooth"});
-}
-function resetForm() {
-  $("conversationForm").reset(); $("editId").value = ""; $("saveBtn").textContent = "Créer la conversation";
-  setStatus("formStatus","Formulaire prêt.");
-}
-function renderItems(items) {
-  const query = $("searchInput").value.trim().toLocaleLowerCase("fr");
-  const filtered = items.filter(item => {
-    const haystack = [itemTitle(item), textValue(item,RDF.contenu), textValue(item,RDF.pourquoi)].join(" ").toLocaleLowerCase("fr");
-    return haystack.includes(query);
+
+  let html = `<h2>${item ? 'Modifier' : 'Nouvel item'} — ${esc(state.current)}</h2><form id="itemForm">`;
+  rtps.forEach((rtp, n) => {
+    const p = state.props[rtp['o:property']['o:id']];
+    const term = p['o:term'];
+    const label = rtp['o:alternate_label'] || p['o:label'];
+    const req = rtp['o:is_required'];
+    const vals = item ? valuesOf(item, term) : [];
+    const id = 'f' + n;
+    html += `<label for="${id}">${esc(label)} ${req ? '<span class="req">*</span>' : ''}</label>`;
+    if (LINKS[term]) {
+      const cur = vals[0] ? vals[0].value_resource_id : '';
+      html += `<select id="${id}" data-term="${term}" data-kind="res" ${req ? 'required' : ''}><option value="">— choisir un item ${esc(LINKS[term])} —</option>` +
+        options[LINKS[term]].map(o => `<option value="${o['o:id']}" ${o['o:id'] === cur ? 'selected' : ''}>${esc(o['o:title'])} (#${o['o:id']})</option>`).join('') + '</select>';
+    } else if (term === NOTE) {
+      const cur = vals[0] ? vals[0]['@value'] : '';
+      html += `<select id="${id}" data-term="${term}" data-kind="lit" ${req ? 'required' : ''}><option value=""></option>` +
+        ['1', '2', '3', '4', '5'].map(o => `<option ${o === cur ? 'selected' : ''}>${o}</option>`).join('') + '</select>';
+    } else if (YESNO.has(term)) {
+      const cur = vals[0] ? vals[0]['@value'] : '';
+      html += `<select id="${id}" data-term="${term}" data-kind="lit" ${req ? 'required' : ''}><option value=""></option>` +
+        ['oui', 'non'].map(o => `<option ${o === cur ? 'selected' : ''}>${o}</option>`).join('') + '</select>';
+    } else if (LONG.has(term)) {
+      html += `<textarea id="${id}" data-term="${term}" data-kind="lit" ${req ? 'required' : ''}>${esc(vals[0] ? vals[0]['@value'] : '')}</textarea>`;
+    } else {
+      html += `<input id="${id}" data-term="${term}" data-kind="lit" ${req ? 'required' : ''} value="${esc(vals[0] ? vals[0]['@value'] : '')}">`;
+    }
+    if (p['o:comment']) html += `<p class="hint">${esc(p['o:comment'])}</p>`;
   });
-  const body = $("itemsBody");
-  if (!filtered.length) {
-    body.innerHTML = `<tr><td colspan="4" class="muted">Aucune conversation trouvée.</td></tr>`;
-  } else {
-    body.innerHTML = filtered.map(item => {
-      const id = Number(item["o:id"]);
-      const title = escapeHtml(itemTitle(item));
-      const content = escapeHtml(textValue(item,RDF.contenu)).slice(0,140);
-      return `<tr><td>${id}</td><td>${title}</td><td>${content || "—"}</td><td><div class="row-actions"><button class="secondary" data-edit="${id}">Modifier</button><button class="danger" data-delete="${id}">Supprimer</button></div></td></tr>`;
-    }).join("");
-  }
-  body.querySelectorAll("[data-edit]").forEach(btn => btn.addEventListener("click", () => {
-    const item = cachedItems.find(x => Number(x["o:id"]) === Number(btn.dataset.edit));
-    if (item) fillForm(item);
-  }));
-  body.querySelectorAll("[data-delete]").forEach(btn => btn.addEventListener("click", () => deleteItem(Number(btn.dataset.delete))));
-  setStatus("listStatus", `${filtered.length} ressource(s) affichée(s) sur ${items.length}.`, "ok");
+  html += `<p class="row" style="margin-top:1rem"><button class="primary" type="submit">${item ? 'Enregistrer' : 'Créer'}</button><button type="button" id="btnCancel">Annuler</button></p></form>`;
+  $('#detail').innerHTML = html;
+  $('#btnCancel').onclick = () => item ? showItem(item['o:id']) : ($('#detail').innerHTML = '<p class="empty">Création annulée.</p>');
+  $('#itemForm').onsubmit = (e) => { e.preventDefault(); saveItem(item, e.target); };
 }
-async function loadItems() {
-  setStatus("listStatus","Chargement des conversations…");
-  try {
-    const params = new URLSearchParams({per_page:"100", sort_by:"id", sort_order:"desc"});
-    const template = $("templateId").value.trim();
-    if (template) params.set("resource_template_id", template);
-    const data = await apiRequest("items?" + params.toString());
-    if (!Array.isArray(data)) throw new Error("Réponse API inattendue : vérifiez l'adresse de l'API.");
-    cachedItems = data; renderItems(cachedItems);
-  } catch (error) {
-    setStatus("listStatus", "Impossible de charger les ressources. " + error.message, "error");
-  }
+
+function buildPayload(form) {
+  const tpl = state.templates[state.current];
+  const cls = state.classes[state.current];
+  const data = {
+    'o:resource_template': { 'o:id': tpl['o:id'] },
+    'o:resource_class': { 'o:id': cls['o:id'] },
+  };
+  form.querySelectorAll('[data-term]').forEach(el => {
+    const term = el.dataset.term, p = state.propsByTerm[term], v = el.value.trim();
+    if (!v) { data[term] = []; return; }
+    data[term] = [el.dataset.kind === 'res'
+      ? { type: 'resource', property_id: p['o:id'], value_resource_id: +v }
+      : { type: 'literal', property_id: p['o:id'], '@value': v }];
+  });
+  return data;
 }
-async function testConnection() {
-  setStatus("connectionStatus","Test de connexion…");
+
+async function saveItem(item, form) {
+  const btn = form.querySelector('button[type="submit"]');
+  btn.disabled = true;
   try {
-    const data = await apiRequest("resource_classes?per_page=1");
-    setStatus("connectionStatus","Connexion à l'API réussie. Les classes de ressources sont accessibles.", "ok");
-    await loadItems();
-  } catch(error) {
-    setStatus("connectionStatus","Échec de connexion. Vérifiez XAMPP, l'adresse de l'API, les autorisations et les éventuels problèmes CORS. " + error.message,"error");
-  }
+    const payload = buildPayload(form);
+    const saved = item
+      ? await api('items/' + item['o:id'], { method: 'PATCH', body: payload })
+      : await api('items', { method: 'POST', body: Object.assign({ 'o:is_public': true }, payload) });
+    flash(item ? 'Item modifié.' : 'Item créé (#' + saved['o:id'] + ').');
+    await loadList();
+    showItem(saved['o:id']);
+  } catch (e) { flash(e.message, 'err'); btn.disabled = false; }
 }
-async function deleteItem(id) {
-  if (!confirm(`Supprimer définitivement la ressource #${id} ? Cette action ne peut pas être annulée.`)) return;
+
+// ─────────────────────────────────────────────────────────────
+// Suppression (DELETE)
+// ─────────────────────────────────────────────────────────────
+async function deleteItem(item) {
+  if (!confirm('Supprimer définitivement « ' + item['o:title'] + ' » ?')) return;
   try {
-    await apiRequest("items/" + id, {method:"DELETE"});
-    setStatus("listStatus",`Ressource #${id} supprimée.`, "ok");
-    await loadItems();
-  } catch(error) { setStatus("listStatus","Suppression impossible : " + error.message,"error"); }
+    await api('items/' + item['o:id'], { method: 'DELETE' });
+    flash('Item supprimé.');
+    $('#detail').innerHTML = '<p class="empty">Item supprimé.</p>';
+    await loadList();
+  } catch (e) { flash(e.message, 'err'); }
 }
-$("connectBtn").addEventListener("click", testConnection);
-$("loadBtn").addEventListener("click", loadItems);
-$("searchBtn").addEventListener("click", () => renderItems(cachedItems));
-$("searchInput").addEventListener("input", () => renderItems(cachedItems));
-$("resetBtn").addEventListener("click", resetForm);
-$("conversationForm").addEventListener("submit", async event => {
-  event.preventDefault();
-  const id = $("editId").value;
-  const payload = buildPayload();
-  setStatus("formStatus", id ? "Enregistrement des modifications…" : "Création de la conversation…");
+
+// ─────────────────────────────────────────────────────────────
+// Démarrage
+// ─────────────────────────────────────────────────────────────
+$('#filter').oninput = () => renderList();
+$('#btnRefresh').onclick = loadList;
+$('#btnNew').onclick = () => showForm(null);
+
+$('#formLocal').onsubmit = async (e) => {
+  e.preventDefault();
   try {
-    const data = await apiRequest(id ? "items/" + id : "items", {
-      method: id ? "PATCH" : "POST",
-      body: JSON.stringify(payload)
-    });
-    setStatus("formStatus",`Enregistrement réussi${data?.["o:id"] ? " (ID Omeka : " + data["o:id"] + ")" : ""}.`, "ok");
-    resetForm();
-    await loadItems();
-  } catch(error) {
-    setStatus("formStatus","Enregistrement impossible : " + error.message + "\nVérifiez les termes RDF configurés, le modèle de ressource et les droits de la clé API.", "error");
+    state.api = $('#apiUrl').value.trim().replace(/\/?$/, '/');
+    await loginLocal($('#lMail').value.trim(), $('#lIdent').value.trim(), $('#lKey').value.trim());
+    await startApp();
+    flash('Connectée en tant que ' + state.session.name + '.');
+  } catch (err) { flash(err.message, 'err'); }
+};
+$('#formGithub').onsubmit = async (e) => {
+  e.preventDefault();
+  try {
+    await loginGithub($('#gToken').value.trim());
+    await startApp();
+    flash('Connectée avec GitHub (' + state.session.login + ').');
+  } catch (err) { flash(err.message, 'err'); }
+};
+initGoogle();
+$('#btnAnon').onclick = async () => {
+  try { state.session = null; await startApp(); } catch (err) { flash(err.message, 'err'); }
+};
+
+(async () => {
+  const savedApi = store.get('artinq_api');
+  if (savedApi) $('#apiUrl').value = savedApi;
+  const saved = store.get('artinq_session');
+  if (saved) {
+    state.session = saved;
+    try { await startApp(); return; } catch (e) { flash(e.message, 'err'); state.session = null; }
   }
-});
+  $('#authView').hidden = false;
+})();
 </script>
 </body>
 </html>
