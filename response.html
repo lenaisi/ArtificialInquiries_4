@@ -245,6 +245,12 @@ async function loadSchema() {
     const m = /^artinq\s+(\w+)$/i.exec(rt['o:label'].trim());
     if (m) state.templates[m[1]] = rt;
   });
+  // sinon : on retrouve le modèle grâce à sa classe (quel que soit son nom)
+  rts.forEach(rt => {
+    const cid = rt['o:resource_class'] && rt['o:resource_class']['o:id'];
+    const c = Object.values(state.classes).find(c => c['o:id'] === cid);
+    if (c && !state.templates[c['o:local_name']]) state.templates[c['o:local_name']] = rt;
+  });
 }
 
 // ─────────────────────────────────────────────────────────────
