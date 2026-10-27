@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memorable Conversations — Administration</title>
+<style>
+:root{--bg:#f4f6fb;--panel:#fff;--ink:#20283a;--muted:#667085;--line:#e4e8f0;--accent:#5146e5;--accent2:#3730a3;--danger:#b42318;--ok:#067647}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:#171b34;color:#fff;padding:24px max(20px,calc((100% - 1180px)/2));}
+header .eyebrow{color:#b9b8ff;text-transform:uppercase;letter-spacing:.12em;font-size:.75rem;font-weight:700}
+header h1{margin:6px 0;font-size:clamp(1.6rem,3vw,2.2rem)}header p{margin:0;color:#d4d7e5}
+main{max-width:1180px;margin:24px auto;padding:0 18px 48px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px;box-shadow:0 5px 20px #26304a0a}
+.panel h2{font-size:1.1rem;margin:0 0 14px}.muted{color:var(--muted);font-size:.9rem}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}
+label{font-weight:650;font-size:.88rem}input,textarea,select{font:inherit;width:100%;border:1px solid #cfd5e2;border-radius:9px;padding:10px 11px;background:#fff;color:var(--ink)}
+textarea{min-height:92px;resize:vertical}input:focus,textarea:focus,select:focus{outline:3px solid #5146e526;border-color:var(--accent)}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}button{border:0;border-radius:9px;padding:10px 14px;font:inherit;font-weight:650;cursor:pointer;background:var(--accent);color:#fff}button:hover{background:var(--accent2)}button.secondary{background:#eef0f7;color:#30384b}button.danger{background:#fff0ef;color:var(--danger)}button:disabled{opacity:.5;cursor:not-allowed}
+.status{padding:11px 13px;border-radius:10px;background:#f0f2f8;color:#414a5d;margin:12px 0;white-space:pre-wrap;overflow-wrap:anywhere}.status.ok{background:#ecfdf3;color:var(--ok)}.status.error{background:#fff0ef;color:var(--danger)}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.toolbar input{max-width:360px}.toolbar select{max-width:280px}
+.table-wrap{overflow:auto;margin-top:12px}table{width:100%;border-collapse:collapse;min-width:620px}th,td{text-align:left;border-bottom:1px solid var(--line);padding:12px 10px;vertical-align:top}th{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}td .row-actions{display:flex;gap:6px}td button{padding:6px 9px;font-size:.85rem}
+.note{border-left:4px solid #f0b429;background:#fffaeb;padding:12px 14px;border-radius:7px;color:#694b00;font-size:.9rem}
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:8px}
+@media(max-width:680px){.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.panel{padding:15px}.toolbar{align-items:stretch}.toolbar input,.toolbar select{max-width:none;width:100%}}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Artificial Inquiries · Exercice 4</div>
+  <h1>Memorable Conversations</h1>
+  <p>Interface de gestion des conversations mémorables avec Omeka S</p>
+</header>
+<main>
+  <section class="panel">
+    <h2>1. Connexion à l'API Omeka S</h2>
+    <p class="muted">Pour tester en local, ouvrez cette page depuis le même serveur XAMPP que votre Omeka S. Les clés ne sont pas enregistrées par cette page.</p>
+    <div class="grid">
+      <div class="field full"><label for="apiBase">Adresse de l'API</label><input id="apiBase" value="http://localhost/omeka-s/api" placeholder="http://localhost/omeka-s/api"></div>
+      <div class="field"><label for="keyIdentity">Clé API — key_identity (facultatif pour lecture publique)</label><input id="keyIdentity" autocomplete="off" placeholder="Votre identité API"></div>
+      <div class="field"><label for="keyCredential">Clé API — key_credential</label><input id="keyCredential" type="password" autocomplete="off" placeholder="Votre clé secrète API"></div>
+      <div class="field full"><label for="templateId">ID du modèle de ressource ConversationMemorable (facultatif)</label><input id="templateId" type="number" min="1" placeholder="À renseigner après vérification dans Omeka S"></div>
+    </div>
+    <div class="actions"><button id="connectBtn">Tester la connexion et charger</button><button class="secondary" id="loadBtn">Actualiser les conversations</button></div>
+    <div id="connectionStatus" class="status" role="status">En attente de connexion.</div>
+    <div class="note"><strong>Sécurité :</strong> ne publiez jamais une clé API privée dans GitHub Pages. Cette page est un prototype pédagogique. Pour une application publique avec opérations d'écriture, utilisez un backend sécurisé ou une authentification serveur adaptée.</div>
+  </section>
+
+  <section class="panel">
+    <h2>2. Ajouter / modifier une conversation</h2>
+    <p class="muted">Les termes RDF personnalisés de votre projet doivent être renseignés dans la configuration JavaScript en bas de ce fichier avant d'utiliser toutes les propriétés.</p>
+    <form id="conversationForm">
+      <input id="editId" type="hidden">
+      <div class="grid">
+        <div class="field full"><label for="titre">Titre *</label><input id="titre" required maxlength="250" placeholder="Titre de la conversation"></div>
+        <div class="field full"><label for="contenu">Contenu</label><textarea id="contenu" placeholder="Contenu de la conversation"></textarea></div>
+        <div class="field full"><label for="pourquoi">Pourquoi est-elle marquante ?</label><textarea id="pourquoi" placeholder="Expliquez pourquoi cette conversation est mémorable"></textarea></div>
+        <div class="field"><label for="note">Note (0 à 10)</label><input id="note" type="number" min="0" max="10" step="1" placeholder="0–10"></div>
+        <div class="field"><label for="evaluation">Évaluation de performance</label><input id="evaluation" placeholder="Ex. : satisfaisante, mitigée…"></div>
+        <div class="field full"><label for="explication">Explication de performance</label><textarea id="explication" placeholder="Expliquez l'évaluation"></textarea></div>
+      </div>
+      <div class="actions"><button type="submit" id="saveBtn">Créer la conversation</button><button class="secondary" type="button" id="resetBtn">Vider le formulaire</button></div>
+      <div id="formStatus" class="status" role="status">Prêt.</div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>3. Conversations enregistrées</h2>
+    <div class="toolbar">
+      <input id="searchInput" placeholder="Rechercher par titre ou contenu…">
+      <button class="secondary" id="searchBtn">Rechercher</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Titre</th><th>Contenu</th><th>Actions</th></tr></thead>
+        <tbody id="itemsBody"><tr><td colspan="4" class="muted">Connectez-vous pour charger les ressources.</td></tr></tbody>
+      </table>
+    </div>
+    <div id="listStatus" class="status" role="status">Aucune donnée chargée.</div>
+  </section>
+  <footer>Prototype pédagogique · HTML / CSS / JavaScript · Omeka S REST API</footer>
+</main>
+<script>
+/*
+ * CONFIGURATION RDF À ADAPTER :
+ * Remplacez les valeurs par les termes exacts de vos propriétés Omeka S.
+ * Exemple de terme : artinq:titre si votre vocabulaire expose ce préfixe.
+ * dcterms:title est une propriété standard utile pour le titre affiché par Omeka.
+ */
+const RDF = {
+  titre: "dcterms:title",
+  contenu: "artinq:contenu",
+  pourquoi: "artinq:pourquoiMarquante",
+  note: "artinq:note",
+  evaluation: "artinq:evaluationPerformance",
+  explication: "artinq:explicationPerformance"
+};
+const $ = id => document.getElementById(id);
+let cachedItems = [];
+
+function baseUrl() {
+  return $("apiBase").value.trim().replace(/\/+$/, "");
+}
+function apiUrl(path) {
+  const url = new URL(baseUrl() + "/" + path.replace(/^\/+/, ""));
+  const identity = $("keyIdentity").value.trim();
+  const credential = $("keyCredential").value.trim();
+  if (identity) url.searchParams.set("key_identity", identity);
+  if (credential) url.searchParams.set("key_credential", credential);
+  return url.toString();
+}
+function setStatus(id, message, kind="") {
+  const el = $(id); el.textContent = message; el.className = "status" + (kind ? " " + kind : "");
+}
+async function apiRequest(path, options={}) {
+  const response = await fetch(apiUrl(path), {
+    ...options,
+    headers: {"Accept":"application/ld+json, application/json", ...(options.body ? {"Content-Type":"application/ld+json"} : {}), ...(options.headers || {})}
+  });
+  const bodyText = await response.text();
+  let data = null;
+  try { data = bodyText ? JSON.parse(bodyText) : null; } catch {}
+  if (!response.ok) {
+    const detail = data?.["o:message"] || data?.message || bodyText || response.statusText;
+    throw new Error(`HTTP ${response.status} — ${detail}`);
+  }
+  return data;
+}
+function valuesFor(item, term) { return Array.isArray(item?.[term]) ? item[term] : []; }
+function textValue(item, term) {
+  const value = valuesFor(item, term)[0];
+  return value ? (value["@value"] ?? value.display_title ?? value["o:label"] ?? "") : "";
+}
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+function itemTitle(item) {
+  return textValue(item, RDF.titre) || item["o:title"] || `Ressource #${item["o:id"]}`;
+}
+function buildLiteral(term, value) {
+  if (!term || !value.trim()) return undefined;
+  return [{"type":"literal","property_id":"auto","@value":value.trim()}];
+}
+function buildPayload() {
+  const titre = $("titre").value.trim();
+  const contenu = $("contenu").value;
+  const pourquoi = $("pourquoi").value;
+  const note = $("note").value;
+  const evaluation = $("evaluation").value;
+  const explication = $("explication").value;
+  const payload = {"dcterms:title":[{"type":"literal","property_id":"auto","@value":titre}]};
+  const fields = [
+    [RDF.contenu, contenu],
+    [RDF.pourquoi, pourquoi],
+    [RDF.note, note],
+    [RDF.evaluation, evaluation],
+    [RDF.explication, explication]
+  ];
+  for (const [term, value] of fields) {
+    if (term && !term.startsWith("REMPLACER:") && value.trim()) {
+      payload[term] = [{"type":"literal","property_id":"auto","@value":value.trim()}];
+    }
+  }
+  const template = $("templateId").value.trim();
+  if (template) payload["o:resource_template"] = {"o:id": Number(template)};
+  return payload;
+}
+function fillForm(item) {
+  $("editId").value = item["o:id"];
+  $("titre").value = textValue(item, RDF.titre) || item["o:title"] || "";
+  $("contenu").value = textValue(item, RDF.contenu);
+  $("pourquoi").value = textValue(item, RDF.pourquoi);
+  $("note").value = textValue(item, RDF.note);
+  $("evaluation").value = textValue(item, RDF.evaluation);
+  $("explication").value = textValue(item, RDF.explication);
+  $("saveBtn").textContent = "Enregistrer les modifications";
+  setStatus("formStatus", `Modification de la ressource #${item["o:id"]}.`);
+  window.scrollTo({top:$("conversationForm").getBoundingClientRect().top + window.scrollY - 20,behavior:"smooth"});
+}
+function resetForm() {
+  $("conversationForm").reset(); $("editId").value = ""; $("saveBtn").textContent = "Créer la conversation";
+  setStatus("formStatus","Formulaire prêt.");
+}
+function renderItems(items) {
+  const query = $("searchInput").value.trim().toLocaleLowerCase("fr");
+  const filtered = items.filter(item => {
+    const haystack = [itemTitle(item), textValue(item,RDF.contenu), textValue(item,RDF.pourquoi)].join(" ").toLocaleLowerCase("fr");
+    return haystack.includes(query);
+  });
+  const body = $("itemsBody");
+  if (!filtered.length) {
+    body.innerHTML = `<tr><td colspan="4" class="muted">Aucune conversation trouvée.</td></tr>`;
+  } else {
+    body.innerHTML = filtered.map(item => {
+      const id = Number(item["o:id"]);
+      const title = escapeHtml(itemTitle(item));
+      const content = escapeHtml(textValue(item,RDF.contenu)).slice(0,140);
+      return `<tr><td>${id}</td><td>${title}</td><td>${content || "—"}</td><td><div class="row-actions"><button class="secondary" data-edit="${id}">Modifier</button><button class="danger" data-delete="${id}">Supprimer</button></div></td></tr>`;
+    }).join("");
+  }
+  body.querySelectorAll("[data-edit]").forEach(btn => btn.addEventListener("click", () => {
+    const item = cachedItems.find(x => Number(x["o:id"]) === Number(btn.dataset.edit));
+    if (item) fillForm(item);
+  }));
+  body.querySelectorAll("[data-delete]").forEach(btn => btn.addEventListener("click", () => deleteItem(Number(btn.dataset.delete))));
+  setStatus("listStatus", `${filtered.length} ressource(s) affichée(s) sur ${items.length}.`, "ok");
+}
+async function loadItems() {
+  setStatus("listStatus","Chargement des conversations…");
+  try {
+    const params = new URLSearchParams({per_page:"100", sort_by:"id", sort_order:"desc"});
+    const template = $("templateId").value.trim();
+    if (template) params.set("resource_template_id", template);
+    const data = await apiRequest("items?" + params.toString());
+    if (!Array.isArray(data)) throw new Error("Réponse API inattendue : vérifiez l'adresse de l'API.");
+    cachedItems = data; renderItems(cachedItems);
+  } catch (error) {
+    setStatus("listStatus", "Impossible de charger les ressources. " + error.message, "error");
+  }
+}
+async function testConnection() {
+  setStatus("connectionStatus","Test de connexion…");
+  try {
+    const data = await apiRequest("resource_classes?per_page=1");
+    setStatus("connectionStatus","Connexion à l'API réussie. Les classes de ressources sont accessibles.", "ok");
+    await loadItems();
+  } catch(error) {
+    setStatus("connectionStatus","Échec de connexion. Vérifiez XAMPP, l'adresse de l'API, les autorisations et les éventuels problèmes CORS. " + error.message,"error");
+  }
+}
+async function deleteItem(id) {
+  if (!confirm(`Supprimer définitivement la ressource #${id} ? Cette action ne peut pas être annulée.`)) return;
+  try {
+    await apiRequest("items/" + id, {method:"DELETE"});
+    setStatus("listStatus",`Ressource #${id} supprimée.`, "ok");
+    await loadItems();
+  } catch(error) { setStatus("listStatus","Suppression impossible : " + error.message,"error"); }
+}
+$("connectBtn").addEventListener("click", testConnection);
+$("loadBtn").addEventListener("click", loadItems);
+$("searchBtn").addEventListener("click", () => renderItems(cachedItems));
+$("searchInput").addEventListener("input", () => renderItems(cachedItems));
+$("resetBtn").addEventListener("click", resetForm);
+$("conversationForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const id = $("editId").value;
+  const payload = buildPayload();
+  setStatus("formStatus", id ? "Enregistrement des modifications…" : "Création de la conversation…");
+  try {
+    const data = await apiRequest(id ? "items/" + id : "items", {
+      method: id ? "PATCH" : "POST",
+      body: JSON.stringify(payload)
+    });
+    setStatus("formStatus",`Enregistrement réussi${data?.["o:id"] ? " (ID Omeka : " + data["o:id"] + ")" : ""}.`, "ok");
+    resetForm();
+    await loadItems();
+  } catch(error) {
+    setStatus("formStatus","Enregistrement impossible : " + error.message + "\nVérifiez les termes RDF configurés, le modèle de ressource et les droits de la clé API.", "error");
+  }
+});
+</script>
+</body>
+</html>
