@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Memorable Conversations — Ex4</title>
+<script src="https://accounts.google.com/gsi/client" async></script>
 <meta name="description" content="IHM CRUD de l'exercice 4 « Memorable Conversations » (Artificial Inquiries) connectée à l'API Omeka S.">
 <style>
   :root {
@@ -109,9 +110,9 @@
         <p class="row" style="margin-top:.8rem"><button type="submit">Se connecter avec GitHub</button></p>
       </form>
 
-      <div class="provider off">
+      <div class="provider">
         <h3>Google</h3>
-        <p class="hint">Non configuré : nécessite un identifiant client OAuth créé dans Google Cloud Console pour l'adresse GitHub Pages (voir GOOGLE_CLIENT_ID dans le code).</p>
+        <p class="hint">Lecture seule. Connexion avec un compte Google (Google Identity Services).</p>
         <div id="googleBtn" style="margin-top:.8rem"></div>
       </div>
 
@@ -258,19 +259,26 @@ async function loadSchema() {
 // ─────────────────────────────────────────────────────────────
 async function loginLocal(mail, ident, key) {
   state.session = { provider: 'local', ident, key };
-  let users;
-  try { users = await api('users?email=' + encodeURIComponent(mail)); }
-  catch (e) {
-    state.session = null;
-    throw new Error(e.message.startsWith('Erreur API') ? 'Email ou clé API incorrects.' : e.message);
+  let u = null;
+  try {
+    const users = await api('users?email=' + encodeURIComponent(mail));
+    u = Array.isArray(users) ? users.find(x => (x['o:email'] || '').toLowerCase() === mail.toLowerCase()) : null;
+  } catch (e) {
+    if (!e.message.startsWith('Erreur API')) { state.session = null; throw e; }
   }
-  const u = Array.isArray(users) && users.find(x => x['o:email'] === mail);
-  if (!u) { state.session = null; throw new Error('Email ou clé API incorrects.'); }
-  state.session = { provider: 'local', ident, key, name: u['o:name'], email: mail, role: u['o:role'], canWrite: true };
+  if (!u) {
+    try { await api('items?per_page=1'); }
+    catch (e) {
+      state.session = null;
+      throw new Error(e.message.startsWith('Erreur API') ? 'Clé API refusée par Omeka S (' + e.message.replace('Erreur API : ', '') + ').' : e.message);
+    }
+  }
+  state.session = { provider: 'local', ident, key, name: u ? u['o:name'] : mail, email: mail,
+    role: u ? u['o:role'] : '', canWrite: true };
 }
 
 // Connexion Google (Google Identity Services) : décode le jeton d'identité (JWT)
-const GOOGLE_CLIENT_ID = ''; // à remplir avec votre propre identifiant client Google
+const GOOGLE_CLIENT_ID = '396217570784-9tup8t1f4gpj1qj2rt4a4lsdcq6ns1mr.apps.googleusercontent.com';
 function decodeJwt(token) {
   const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
   const json = decodeURIComponent(atob(b64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
